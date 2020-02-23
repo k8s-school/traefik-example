@@ -67,6 +67,9 @@ kubectl create secret generic --namespace=kube-system mysecret --from-file auth
 # Patch ingress according to doc: https://docs.traefik.io/user-guide/kubernetes/#creating-the-secret
 kubectl apply -f $DIR/manifest/auth-ingress.yaml
 
+# Log in via browser to http://"$INGRESS_DN", and https://"$INGRESS_DN"
+# a password is now required
+
 # Name-based routing: https://docs.traefik.io/user-guide/kubernetes/#name-based-routing
 #
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-deployments.yaml
