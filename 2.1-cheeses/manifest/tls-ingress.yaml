@@ -7,7 +7,7 @@ metadata:
     kubernetes.io/ingress.class: traefik
 spec:
   rules:
-  - host: ingress.kind 
+  - host: traefik-ui.kind 
     http:
       paths:
       - path: /

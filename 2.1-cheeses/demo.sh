@@ -10,7 +10,7 @@ DIR=$(cd "$(dirname "$0")"; pwd -P)
 
 NODE="kind-worker"
 DN="kind"
-INGRESS_DN="ingress.$DN"
+INGRESS_DN="traefik-ui.$DN"
 NS="default"
 
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/traefik-rbac.yaml
@@ -19,7 +19,7 @@ kubectl --namespace=kube-system get pods
 kubectl get services --namespace=kube-system
 
 # Ingress to Traefik web ui
-kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/ui.yaml
+kubectl apply -f $DIR/manifest/ui.yaml
 
 # WARN need to be ran on host
 NODE_IP=$(kubectl get nodes $NODE -o jsonpath='{ .status.addresses[?(@.type=="InternalIP")].address }')
@@ -27,16 +27,8 @@ echo "${NODE_IP} $INGRESS_DN" | sudo tee -a /etc/hosts
 
 kubectl --namespace=kube-system wait --timeout=400s --for=condition=ready pod -l k8s-app=traefik-ingress-lb,name=traefik-ingress-lb
 
-# Return 404
-curl http://"$INGRESS_DN"
-
-# Add kind support to ingress rule
-curl https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-ingress.yaml | \
-    sed "s/.minikube/.$DN/" | \
-    kubectl apply -f -
-
 # WARN run on host
-# Ingress ui is available 
+# Ingress to traefik-ui is available 
 curl http://"$INGRESS_DN"
 
 # TLS support
@@ -74,13 +66,8 @@ kubectl apply -f $DIR/manifest/auth-ingress.yaml
 # Name-based routing: https://docs.traefik.io/user-guide/kubernetes/#name-based-routing
 #
 kubectl apply --namespace="$NS" -f $DIR/manifest/cheese-deployments.yaml
-kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-services.yaml
-kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-ingress.yaml
-
-# Add kind support to ingress rule
-curl https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-ingress.yaml | \
-    sed "s/\.minikube/\.$DN/" | \
-    kubectl apply -f -
+kubectl apply -f $DIR/manifest/cheese-services.yaml
+kubectl apply -f $DIR/manifest/cheese-ingress.yaml
 
 echo "${NODE_IP} stilton.$DN cheddar.$DN wensleydale.$DN" | sudo tee -a /etc/hosts
 
@@ -91,13 +78,10 @@ curl http://stilton."$DN"
 
 # Path-based Routing: https://docs.traefik.io/user-guide/kubernetes/#path-based-routing
 #
-curl https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheeses-ingress.yaml | \
-    sed "s/\.minikube/\.$DN/" | \
-    kubectl apply -f -
+kubectl apply -f $DIR/manifest/cheeses-ingress.yaml
 
 echo "${NODE_IP} cheeses.$DN" | sudo tee -a /etc/hosts
 
 # Open in browser
 # WARN: do not forget the final slash
 curl http://cheeses."$DN"/stilton/
-
