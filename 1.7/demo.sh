@@ -11,6 +11,7 @@ DIR=$(cd "$(dirname "$0")"; pwd -P)
 NODE="kind-worker"
 DN="kind"
 INGRESS_DN="ingress.$DN"
+NS="default"
 
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/traefik-rbac.yaml
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/traefik-ds.yaml
@@ -72,7 +73,7 @@ kubectl apply -f $DIR/manifest/auth-ingress.yaml
 
 # Name-based routing: https://docs.traefik.io/user-guide/kubernetes/#name-based-routing
 #
-kubectl apply -f $DIR/manifest/cheese-deployments.yaml
+kubectl apply --namespace="$NS" -f $DIR/manifest/cheese-deployments.yaml
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-services.yaml
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-ingress.yaml
 
