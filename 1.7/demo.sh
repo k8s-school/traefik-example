@@ -72,7 +72,7 @@ kubectl apply -f $DIR/manifest/auth-ingress.yaml
 
 # Name-based routing: https://docs.traefik.io/user-guide/kubernetes/#name-based-routing
 #
-kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-deployments.yaml
+kubectl apply -f $DIR/manifest/cheese-deployments.yaml
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-services.yaml
 kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/cheese-ingress.yaml
 
@@ -83,6 +83,7 @@ curl https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/chee
 
 echo "${NODE_IP} stilton.$DN cheddar.$DN wensleydale.$DN" | sudo tee -a /etc/hosts
 
+kubectl --namespace="$NS" wait --timeout=400s --for=condition=available deploy --all
 # Open in browser
 curl http://stilton."$DN"
 

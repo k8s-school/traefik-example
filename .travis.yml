@@ -10,4 +10,4 @@ before_script:
   - ./kind-travis-ci/kind/k8s-create.sh
 
 script:
-  - ./exercice.sh
+  - ./1.7/demo.sh
