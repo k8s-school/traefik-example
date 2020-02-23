@@ -1,11 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 # Pre-requisite: set up k8s cluster and set KUBECONFIG
 
-set -e
-set -x
+set -euxo pipefail
 
-echo "$WARN: run on docker host, not inside kubectl"
+echo "WARN: run on docker host, not inside kubectl"
 
 DIR=$(cd "$(dirname "$0")"; pwd -P)
 
@@ -24,6 +23,8 @@ kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examp
 # WARN need to be ran on host
 NODE_IP=$(kubectl get nodes $NODE -o jsonpath='{ .status.addresses[?(@.type=="InternalIP")].address }')
 echo "${NODE_IP} $INGRESS_DN" | sudo tee -a /etc/hosts
+
+kubectl --namespace=kube-system wait --timeout=400s --for=condition=ready pod -l k8s-app=traefik-ingress-lb,name=traefik-ingress-lb
 
 # Return 404
 curl http://"$INGRESS_DN"
@@ -64,7 +65,7 @@ htpasswd  -bc ./auth user pass
 kubectl delete secret --namespace=kube-system mysecret --ignore-not-found=true
 kubectl create secret generic --namespace=kube-system mysecret --from-file auth 
 # Patch ingress according to doc: https://docs.traefik.io/user-guide/kubernetes/#creating-the-secret
-kubectl apply -f manifest/auth-ingress.yaml
+kubectl apply -f $DIR/manifest/auth-ingress.yaml
 
 # Name-based routing: https://docs.traefik.io/user-guide/kubernetes/#name-based-routing
 #
